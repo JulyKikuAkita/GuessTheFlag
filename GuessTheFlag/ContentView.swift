@@ -34,9 +34,7 @@ struct ContentView: View {
                     }){
                         Image(self.countries[number].lowercased())
                             .renderingMode(.original)
-                            .clipShape(Capsule())
-                            .overlay(Capsule().stroke(Color.black, lineWidth: 5))
-                            .shadow(color: .white, radius: 2)
+                            .cusomStoke(stokeColor: .blue, stokeLineWidth: 5.0, shadowColor: .gray, shadowRadius: 3.0)
                     }
                 }
                 Text("Your score: \(score)")
@@ -65,6 +63,27 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+    }
+}
+
+// custom modifier
+struct CustomStroke: ViewModifier {
+    var stokeColor: Color
+    var stokeLineWidth: CGFloat
+    var shadowColor: Color = .white
+    var shadowRadius: CGFloat = 2
+
+    func body(content: Content) -> some View {
+        content
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(stokeColor, lineWidth: stokeLineWidth))
+            .shadow(color: shadowColor, radius: shadowRadius)
+    }
+}
+
+extension View {
+    func cusomStoke(stokeColor: Color, stokeLineWidth: CGFloat, shadowColor: Color = .white, shadowRadius: CGFloat = 2) -> some View {
+        self.modifier(CustomStroke(stokeColor: stokeColor, stokeLineWidth: stokeLineWidth, shadowColor: shadowColor, shadowRadius: shadowRadius))
     }
 }
 
