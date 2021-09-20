@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  GuessTheFlag
+//  https://www.hackingwithswift.com/guide/ios-swiftui/2/3/challenge
 //
 //  Created by Ifang Lee on 9/14/21.
 //
@@ -8,33 +8,46 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
-    @State private var correctAnswer = Int.random(in: 0...2)
+    @State private var collections = ["Rock", "Paper", "Scissors"].shuffled()
+    @State private var currentGesture = Int.random(in: 0...2)
+    @State private var currentAction = Bool.random()
 
     @State private var showingScore = false
     @State private var scoreTitle = ""
     @State private var score = 0
+    @State private var round = 0
+
+    var playerAction: String {
+        if currentAction {
+            return "Win"
+        }
+        return "Lose"
+    }
 
     var body: some View {
         ZStack{
-            LinearGradient(gradient: Gradient(colors: [.green, .black]), startPoint: .top, endPoint: .bottom)
+            LinearGradient(gradient: Gradient(colors: [.gray, .black]), startPoint: .top, endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
             VStack(spacing: 30) {
                 VStack {
-                    Text("Tap the flag...")
-                    Text(countries[correctAnswer])
-                        .font(.largeTitle)
+                    Text("You need to")
+                    Text("\(playerAction)")
+                        .bold()
+                        .foregroundColor(.red)
+                    Text(collections[currentGesture])
                         .fontWeight(.black)
                 }
+                .font(.largeTitle)
                 .foregroundColor(.white)
 
                 ForEach(0 ..< 3) { number in
                     Button(action: {
                         self.flagTapped(number)
                     }){
-                        Image(self.countries[number].lowercased())
-                            .renderingMode(.original)
-                            .cusomStoke(stokeColor: .blue, stokeLineWidth: 5.0, shadowColor: .gray, shadowRadius: 3.0)
+                        Text("\(collections[number])")
+                            .foregroundColor(.white)
+                            .padding()
+                            .cusomStoke(stokeColor: .white, stokeLineWidth: 5.0, shadowColor: .gray, shadowRadius: 3.0)
                     }
                 }
                 Text("Your score: \(score)")
@@ -50,19 +63,36 @@ struct ContentView: View {
     }
 
     func flagTapped( _ number: Int) {
-        if number == correctAnswer {
-            scoreTitle = "Correct"
-            score += 5
+        round += 1
+        let correctAnswer = getAnswer()
+        if collections[number] == correctAnswer {
+            scoreTitle = "Result for 10 questions"
+            score += 1
         } else {
-            scoreTitle = "Wrong! That’s the flag of \(countries[number])"
-            score -= 5
+            score -= 1
         }
-        showingScore = true
+        print("Round \(round): question is to \(playerAction) \(collections[currentGesture])")
+        print("Round \(round): answer is \(correctAnswer)")
+        print("Round \(round): you chose \(collections[number])")
+        askQuestion()
+        if round == 10 {
+            showingScore = true
+            round = 0
+        }
     }
 
     func askQuestion() {
-        countries.shuffle()
-        correctAnswer = Int.random(in: 0...2)
+        collections.shuffle()
+        currentGesture = Int.random(in: 0...2)
+        currentAction = Bool.random()
+    }
+
+    func getAnswer() -> String {
+        let rules = [
+            "Lose": ["Paper":"Rock", "Rock":"Scissors", "Scissors": "Paper"],
+            "Win": ["Paper":"Scissors", "Rock":"Paper", "Scissors": "Rock"]
+        ]
+        return rules[playerAction]?[collections[currentGesture]] ?? ""
     }
 }
 
