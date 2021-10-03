@@ -15,6 +15,9 @@ struct ContentView: View {
     @State private var scoreTitle = ""
     @State private var score = 0
 
+    @State private var animationRotateAngles = 0.0
+    @State private var showScaleAnimation = false
+
     var body: some View {
         ZStack{
             LinearGradient(gradient: Gradient(colors: [.green, .black]), startPoint: .top, endPoint: .bottom)
@@ -29,16 +32,38 @@ struct ContentView: View {
                 .foregroundColor(.white)
 
                 ForEach(0 ..< 3) { number in
-                    Button(action: {
-                        self.flagTapped(number)
-                    }){
-                        Image(self.countries[number].lowercased())
-                            .renderingMode(.original)
-                            .cusomStoke(stokeColor: .blue, stokeLineWidth: 5.0, shadowColor: .gray, shadowRadius: 3.0)
+                    if number == correctAnswer {
+                        Button(action: {
+                            withAnimation() {
+                                flagTapped(number)
+                            }
+                        }) {
+                            Image(countries[number].lowercased())
+                                .renderingMode(.original)
+                                .cusomStoke(stokeColor: .blue, stokeLineWidth: 5.0, shadowColor: .gray, shadowRadius: 3.0)
+                        }
+                        .rotation3DEffect(.degrees(animationRotateAngles), axis: (x: 0, y: 1, z: 0))
+                    } else {
+                        Button(action: {
+                            withAnimation() {
+                                flagTapped(number)
+                            }
+                        }) {
+                            Image(countries[number].lowercased())
+                                .renderingMode(.original)
+                                .cusomStoke(stokeColor: .blue, stokeLineWidth: 5.0, shadowColor: .gray, shadowRadius: 3.0)
+                        }
+                        .scaleEffect(showScaleAnimation ? 0.7 : 1.0)
                     }
                 }
-                Text("Your score: \(score)")
-                    .foregroundColor(.white)
+
+                if showingScore {
+                    Text("Your score: \(score)")
+                        .foregroundColor(.white)
+//                        .transition(AnyTransition.opacity.animation(.easeInOut(duration: 1.0)))
+                        .transition(.asymmetric(insertion: .opacity, removal: .scale))
+                }
+
                 Spacer()
             }
         }
@@ -53,9 +78,11 @@ struct ContentView: View {
         if number == correctAnswer {
             scoreTitle = "Correct"
             score += 5
+            animationRotateAngles = 360
         } else {
             scoreTitle = "Wrong! That’s the flag of \(countries[number])"
             score -= 5
+            showScaleAnimation = true
         }
         showingScore = true
     }
@@ -63,6 +90,12 @@ struct ContentView: View {
     func askQuestion() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        resetAnimation()
+    }
+
+    func resetAnimation() {
+        animationRotateAngles = 0
+        showScaleAnimation = false
     }
 }
 
