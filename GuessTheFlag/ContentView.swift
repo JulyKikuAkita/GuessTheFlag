@@ -35,54 +35,74 @@ struct ContentView: View {
 
     var body: some View {
         ZStack{
-            LinearGradient(gradient: Gradient(colors: [.green, .black]), startPoint: .top, endPoint: .bottom)
-                .edgesIgnoringSafeArea(.all)
-            VStack(spacing: 30) {
-                VStack {
-                    Text("Tap the flag...")
-                    Text(countries[correctAnswer])
-                        .font(.largeTitle)
-                        .fontWeight(.black)
-                }
-                .foregroundColor(.white)
+            RadialGradient(stops: [
+                .init(color: Color(red: 0.1, green: 0.2, blue: 0.45, opacity: 1.0), location: 0.3),
+                .init(color: Color(red: 0.76, green: 0.15, blue: 0.26, opacity: 1.0), location: 0.3)
+            ], center: .top, startRadius: 200, endRadius: 700)
+//            LinearGradient(gradient: Gradient(colors: [.green, .black]), startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
 
-                ForEach(0 ..< 3) { number in
-                    if number == correctAnswer {
-                        Button(action: {
-                            withAnimation() {
-                                flagTapped(number)
+            VStack {
+                Spacer()
+                Text("Guess the Flag")
+                    .font(.largeTitle.bold())
+                    .foregroundColor(.white)
+
+                VStack(spacing: 15) {
+                    VStack {
+                        Text("Tap the flag of...")
+                            .font(.subheadline.weight(.heavy))
+
+                        Text(countries[correctAnswer])
+                            .font(.largeTitle.weight(.semibold))
+                    }
+                    .foregroundStyle(.secondary)
+
+                    ForEach(0 ..< 3) { number in
+                        if number == correctAnswer {
+                            Button(action: {
+                                withAnimation() {
+                                    flagTapped(number)
+                                }
+                            }) {
+                                Image(countries[number].lowercased())
+                                    .renderingMode(.original)
+                                    .cusomStoke(stokeColor: .blue, stokeLineWidth: 5.0, shadowColor: .gray, shadowRadius: 3.0)
+                                    .accessibilityLabel(labels[countries[number], default: "Unknow flag"])
                             }
-                        }) {
-                            Image(countries[number].lowercased())
-                                .renderingMode(.original)
-                                .cusomStoke(stokeColor: .blue, stokeLineWidth: 5.0, shadowColor: .gray, shadowRadius: 3.0)
-                                .accessibilityLabel(labels[countries[number], default: "Unknow flag"])
-                        }
-                        .rotation3DEffect(.degrees(animationRotateAngles), axis: (x: 0, y: 1, z: 0))
-                    } else {
-                        Button(action: {
-                            withAnimation() {
-                                flagTapped(number)
+                            .rotation3DEffect(.degrees(animationRotateAngles), axis: (x: 0, y: 1, z: 0))
+                        } else {
+                            Button(action: {
+                                withAnimation() {
+                                    flagTapped(number)
+                                }
+                            }) {
+                                Image(countries[number].lowercased())
+                                    .renderingMode(.original)
+                                    .cusomStoke(stokeColor: .blue, stokeLineWidth: 5.0, shadowColor: .gray, shadowRadius: 3.0)
+                                    .accessibilityLabel(labels[countries[number], default: "Unknow flag"])
                             }
-                        }) {
-                            Image(countries[number].lowercased())
-                                .renderingMode(.original)
-                                .cusomStoke(stokeColor: .blue, stokeLineWidth: 5.0, shadowColor: .gray, shadowRadius: 3.0)
-                                .accessibilityLabel(labels[countries[number], default: "Unknow flag"])
+                            .scaleEffect(showScaleAnimation ? 0.7 : 1.0)
                         }
-                        .scaleEffect(showScaleAnimation ? 0.7 : 1.0)
                     }
                 }
-
-                if showingScore {
-                    Text("Your score: \(score)")
-                        .foregroundColor(.white)
-//                        .transition(AnyTransition.opacity.animation(.easeInOut(duration: 1.0)))
-                        .transition(.asymmetric(insertion: .opacity, removal: .scale))
-                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
 
                 Spacer()
+                Spacer()
+
+                Text("Your score: \(score)")
+                    .foregroundColor(.white)
+                    .font(.title.bold())
+    //                        .transition(AnyTransition.opacity.animation(.easeInOut(duration: 1.0)))
+                    .transition(.asymmetric(insertion: .opacity, removal: .scale))
+                
+                Spacer()
             }
+            .padding()
         }
         .alert(isPresented: $showingScore) {
             Alert(title: Text(scoreTitle), message: Text("Your score is \(score)"), dismissButton: .default(Text("Continue")){
